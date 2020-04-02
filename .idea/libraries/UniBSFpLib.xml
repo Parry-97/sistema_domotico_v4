@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="UniBSFpLib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/UniBSFpLib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
