@@ -31,6 +31,16 @@ import java.util.*;
  */
 public class Main {
 
+    //TODO: Testare a fondo che non ci siano problemi con attività schedulate specialmente se sono più di una alla stessa ora
+
+    //TODO: Attivazione/Disattivazione di sensori/attuatori e conseguentemente delle regole riguardanti tali dispositivi
+    //TODO: Disattivazione/Attivazione selettiva di regole
+    //TODO: Mostra rilevazioni solo di sensori attivi (case 13)
+    //TODO: Setta modOpe solo di attuatori attivi (case 14)
+    //TODO: Input di sensori/attuatori attivi a regole (case 5 fruit) , time e start(
+    // ENABLED --> IF s1_sens.tempe < 100 THEN a1_sw := on , start := 15.10
+    // DISABLED --> IF time > 15.00 THEN a2_sw := on)
+
     public static void main(String[] args) {
 
         UnitaImmobiliare unitaImmobiliare = new UnitaImmobiliare();
@@ -38,7 +48,6 @@ public class Main {
         ArrayList<ModalitaOperativa> listaModalitaOperative = new ArrayList<>();
         ArrayList<CategoriaAttuatore> listaCategoriaAttuatori = new ArrayList<>();
         ArrayList<CategoriaSensore> listaCategoriaSensori = new ArrayList<>();
-        RuleParser ruleParser = new RuleParser();
         int contatoreOperazioni = 0;
 
         String operatore;
@@ -980,6 +989,7 @@ public class Main {
 
 
                 unitaImmobiliare = new UnitaImmobiliare();
+                RuleParser ruleParser = new RuleParser();
 
                 do {
                     if (contatoreOperazioni == 4 && !unitaImmobiliare.getTipo().equals("")) {
@@ -1020,7 +1030,7 @@ public class Main {
                                         if (immo.getNome().equals(seleziona)) {
                                             presente = true;
                                             unitaImmobiliare = immo;
-                                            ruleParser.setFileName(seleziona+".txt");
+                                            ruleParser.setUp(seleziona+".txt",immo.getListaSensori(),immo.getListaAttuatori());
                                             break;
                                         }
                                     }
@@ -1269,7 +1279,7 @@ public class Main {
                             else
                                 System.out.println(readRules);
 
-                            String regola = "IF ", logico = " ";
+                            String regola = "ENABLED --> IF ", logico = " ";
                             boolean proseguire = false;
 
                             do {
@@ -1552,14 +1562,16 @@ public class Main {
                             } while (azione);
 
                             System.out.println("+++ Regola inserita: " + regola);
-                            ruleParser.writeRuleToFile(regola);
+                            ruleParser.writeRuleToFile(regola,true);
 
                             break;
                         case 0:
                             System.out.println("USCITA DAL SISTEMA FRUITORE.\n");
+                            ruleParser.stopTimer();
                             break;
                     }
                 } while (caso != 0);
+
             } else {
                 System.out.println("USCITA DAL SISTEMA DOMOTICO\n");
             }
@@ -1599,6 +1611,10 @@ public class Main {
             System.out.println("!!! Si è verificato un errore nel salvataggio delle " + filename.replace("_"," ")
                                                                                                 .replace(".ser", "") + " !!!");
         }
+    }
+
+    public static String getOraCorrente() {
+        return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "." + Calendar.getInstance().get(Calendar.MINUTE);
     }
 
 }

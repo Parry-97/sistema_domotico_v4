@@ -1,32 +1,34 @@
 package inge.progetto;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class RuleParser {
 
+    //TODO: Tradurre magari in italiano
+
     private String fileName;
-
-
-    public RuleParser(String fileName) {
-        this.fileName = fileName;
-    }
+    private Timer timer;
 
     public RuleParser() {
         this.fileName = "";
     }
 
-    public void setFileName(String fileName) {
+    public void setUp(String fileName, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         this.fileName = fileName;
+        this.timer = new Timer("TimerThread");
     }
 
-    public void writeRuleToFile(String text) {
+    public void stopTimer() {
+        this.timer.cancel();
+    }
+
+    public void writeRuleToFile(String text,boolean append) {
         if (fileName.isEmpty())
             return;
 
         try {
-
-            FileWriter fileWriter = new FileWriter(fileName,true);
+            FileWriter fileWriter = new FileWriter(fileName, append);
             PrintWriter writer = new PrintWriter(fileWriter);
 
             writer.println(text);
@@ -80,23 +82,105 @@ public class RuleParser {
         String[] rules = readRules.split("\n");
 
         for (String r : rules) {
+            if (!verificaAbilitazione(r,listaSensori,listaAttuatori) || r.startsWith("DISABLED -->"))
+                continue;
 
-            String r2 = r.replace("IF ", "");
+            String r2 = r.replace("ENABLED --> IF ", "");
             String[] tokens = r2.split(" THEN ");
 
             boolean ris = calculate(tokens[0], listaSensori);
-            System.out.println(r + " :: " + ris);
+            System.out.println(r2 + " :: " + ris);
             if (ris)
                 applyActions(tokens[1], listaAttuatori);
         }
     }
 
-    private void applyActions(String token, ArrayList<Attuatore> listaAttuatori) {
-        for (String tok : token.split(" ; "))
-            apply(tok, listaAttuatori);
+    //TODO: Fruitore puo anche selettivamente disabilitare singole regole in modo specifico !!! CHE COIONI
+    private boolean verificaAbilitazione(String regola, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
+        for (Sensore sens: listaSensori) {
+            if (!sens.isAttivo() && regola.contains(sens.getNome())) {
+                return false;
+            }
+        }
+
+        for (Attuatore att : listaAttuatori) {
+            if (!att.isAttivo() && regola.contains(att.getNome())) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private static void apply(String act, ArrayList<Attuatore> listaAttuatori) {
+    //TODO: Implementare nelle regole
+    public void cambiaAbilitazioneRegola(String target, boolean abil) {
+        String[] letto = readRuleFromFile().split("\n");
+
+        for (int i = 0; i < letto.length; i++) {
+            if (letto[i].equals(target)) {
+                if (abil) {
+                    if (letto[i].startsWith("DISABLED --> "))
+                        letto[i] = letto[i].replace("DISABLED --> ", "ENABLED --> ");
+
+                } else {
+
+                    if (letto[i].startsWith("ENABLED --> "))
+                        letto[i] = letto[i].replace("ENABLED --> ", "DISABLED --> ");
+
+                }
+                break;
+            }
+        }
+
+        writeRuleToFile("",false);
+        for (String regola : letto) {
+            writeRuleToFile(regola,true);
+        }
+    }
+
+    //TODO: Controlla abilita regole con quel dispositivo da richiamare quando si abilita un sensore/attuatore
+    public void abilitaRegoleconDispositivo(String nomeDispositivo, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
+        String[] regole = readRuleFromFile().split("\n");
+        for (int i = 0; i < regole.length; i++) {
+            if (regole[i].contains(nomeDispositivo)) {
+                verificaAbilitazione(regole[i], listaSensori, listaAttuatori);
+            }
+        }
+    }
+
+    //TODO: disabilita regole con quel dispositivo da richiamare quando si disabilita un sensore/attuatore
+    public void disabilitaRegolaConDispositivo(String nomeDispositivo) {
+        String[] regole = readRuleFromFile().split("\n");
+        for (int i = 0; i < regole.length; i++) {
+            if (regole[i].contains(nomeDispositivo)) {
+                cambiaAbilitazioneRegola(regole[i],false);
+            }
+        }
+    }
+
+    //TODO: Finire defininizione di azione programmata e il suo scheduling
+    private void applyActions(String token, ArrayList<Attuatore> listaAttuatori) {
+        for (String tok : token.split(" ; "))
+            if (tok.contains("start")) {
+                this.timer.schedule(new AzioneProgrammata(listaAttuatori, tok.split(" , ")[0]),
+                        getTime(tok.split(" , ")[1]
+                                .split(" := ")[1]));
+            } else {
+                apply(tok, listaAttuatori);
+            }
+    }
+
+    private Date getTime(String time) {
+        String[] timetokens = time.split("\\.");
+        int hour = Integer.parseInt(timetokens[0]);
+        int minute = Integer.parseInt(timetokens[1]);
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
+        return cal.getTime();
+    }
+
+    private void apply(String act, ArrayList<Attuatore> listaAttuatori) {
         String[] toks = act.split(" := ");
 
         Attuatore actD = null;
@@ -137,13 +221,42 @@ public class RuleParser {
             String[] expTok = cos.split(" AND ", 2);
             return calculate(expTok[0], listaSensori) && calculate(expTok[1], listaSensori);
         }
+        //TODO: Riguarda exp reg perche non accurata
+        if (cos.matches("time ([<>=]|<=|>=) [0-2][0-9].[0-5][0-9]")) {
+            return evalTimeExp(cos.split(" "));
+        }
 
+        //TODO: Migliorare magari la regex e renderla piu specifica...troppo generica forse cosi
         if (cos.matches("[^<>=\t\n ]+ ([<>=]|<=|>=) [^<>=\t\n ]+")) {
             String[] expTok = cos.split(" ");
             return getValExp(expTok, listaSensori);
 
         }
         return false;
+
+    }
+
+    //TODO: Testa
+    private boolean evalTimeExp(String[] expTok) {
+        Date currentDate = Calendar.getInstance().getTime();
+        Date confDate = getTime(expTok[2]);
+        String operator = expTok[1];
+
+        if (operator.startsWith("<")) {
+            if (operator.endsWith("="))
+                return currentDate.compareTo(confDate) <= 0;
+            else
+                return currentDate.compareTo(confDate) < 0;
+
+        } else if (operator.startsWith(">")) {
+            if (operator.endsWith("="))
+                return currentDate.compareTo(confDate) >= 0;
+            else
+                return currentDate.compareTo(confDate) > 0;
+
+        } else {
+            return currentDate.compareTo(confDate) == 0;
+        }
 
     }
 
@@ -169,7 +282,6 @@ public class RuleParser {
         Informazione misura1 = sens1.getInformazione(sensVar[1]);
 
         if (misura1 == null) {
-            System.out.println("Misura s1 non trovata");
             return false;
         }
 
@@ -185,8 +297,8 @@ public class RuleParser {
 
             return evalOp(operator, value, num);
         }
-
-        if (var2.matches("[A-Za-z]([a-zA-Z]|[0-9])*_[A-Za-z]([a-zA-Z]|[0-9])+\\.([a-zA-Z]|[0-9])+")) {
+        //TODO: Controllare magari con nomi diversi per vedere che non causi errori
+        if (var2.matches("[A-Za-z]([a-zA-Z0-9])*_[A-Za-z]([a-zA-Z0-9])+\\.([a-zA-Z0-9])+(_[A-Za-z][a-zA-Z0-9]*)*")) {
             String[] sensVar2 = var2.split("\\.");
             Sensore sens2 = null;
 
@@ -251,6 +363,26 @@ public class RuleParser {
         } else {
             return value1 == value2;
 
+        }
+    }
+
+    //TODO: Far vedere la regola da cui deriva azione programmata
+    //TODO: Schedularla una sola volta
+    //TODO: Gestire OUTPUT
+    private class AzioneProgrammata extends TimerTask {
+
+        private ArrayList<Attuatore> attuatori;
+        private String azione;
+
+        public AzioneProgrammata(ArrayList<Attuatore> attuatori, String azione) {
+            this.attuatori = attuatori;
+            this.azione = azione;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("\n...AZIONE PROGRAMMATA...");
+            apply(this.azione, this.attuatori);
         }
     }
 }

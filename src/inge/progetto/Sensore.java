@@ -110,10 +110,10 @@ public class Sensore {
 
         return null;
     }
-
+    //TODO: Modificare anche in v3
     public void aggiornaInfo(){
         for (Informazione info : this.rilevazioni) {
-            if (info.getTipo().equals("M"))
+            if (info instanceof ModalitaOperativa)
                 continue;
             info.aggiornaValore();
         }
@@ -138,5 +138,13 @@ public class Sensore {
      */
     public boolean isConnesso() {
         return connesso;
+    }
+
+    public boolean isAttivo() {
+        return statoAttivazione;
+    }
+
+    public void setStatoAttivazione(boolean statoAttivazione) {
+        this.statoAttivazione = statoAttivazione;
     }
 }

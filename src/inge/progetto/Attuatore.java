@@ -94,8 +94,15 @@ public class Attuatore {
     /**Aggiunge l'artefatto alla lista degli artefatti comandati dall'attuatore
      * @param art nuovo artefatto che si desidera comandare attraverso l'attuatore
      */
+    //TODO: Modificare anche in v1, v2 e v3
     public void aggiungiArtefatto(Artefatto art) {
         listaComandati.add(art);
+        for (ModalitaOperativa m: this.categoria.getModalita()) {
+            if (m.getValore().equals(modalitaAttuale)) {
+                art.setStatoAttuale(m);
+                break;
+            }
+        }
     }
 
     /**Permette di specificare la lista di artefatti che si desiderano comandare attraverso l'attuatore
@@ -181,7 +188,7 @@ public class Attuatore {
     /**Fornisce lo stato di attivazione dell'attuatore(accesso o spento)
      * @return true se l'attuatore è acceso e false se è spento
      */
-    public boolean getStatoAttivazione() {
+    public boolean isAttivo() {
         return statoAttivazione;
     }
 
