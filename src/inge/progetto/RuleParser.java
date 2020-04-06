@@ -5,8 +5,6 @@ import java.util.*;
 
 public class RuleParser {
 
-    //TODO: Tradurre magari in italiano
-
     private String fileName;
     private Timer timer;
 
@@ -108,6 +106,7 @@ public class RuleParser {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -131,23 +130,25 @@ public class RuleParser {
             }
         }
 
-        writeRuleToFile("",false);
-        for (String regola : letto) {
-            writeRuleToFile(regola,true);
+        String regoleModificate = "";
+        for (int i = 0; i < letto.length-1; i++) {
+            regoleModificate += letto[i] + "\n";
         }
+        regoleModificate += letto[letto.length-1];
+        writeRuleToFile(regoleModificate, false);
     }
 
-    //TODO: Controlla abilita regole con quel dispositivo da richiamare quando si abilita un sensore/attuatore
     public void abilitaRegoleconDispositivo(String nomeDispositivo, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         String[] regole = readRuleFromFile().split("\n");
         for (int i = 0; i < regole.length; i++) {
             if (regole[i].contains(nomeDispositivo)) {
-                verificaAbilitazione(regole[i], listaSensori, listaAttuatori);
+                if(verificaAbilitazione(regole[i], listaSensori, listaAttuatori)) {
+                    cambiaAbilitazioneRegola(regole[i], true);
+                }
             }
         }
     }
 
-    //TODO: disabilita regole con quel dispositivo da richiamare quando si disabilita un sensore/attuatore
     public void disabilitaRegolaConDispositivo(String nomeDispositivo) {
         String[] regole = readRuleFromFile().split("\n");
         for (int i = 0; i < regole.length; i++) {
