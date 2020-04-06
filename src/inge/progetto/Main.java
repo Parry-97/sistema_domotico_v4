@@ -33,15 +33,7 @@ public class Main {
 
     //TODO: Testare a fondo che non ci siano problemi con attività schedulate specialmente se sono più di una alla stessa ora
 
-    //TODO: Attivazione/Disattivazione di sensori/attuatori e conseguentemente delle regole riguardanti tali dispositivi
-    //TODO: Disattivazione/Attivazione selettiva di regole
-    //TODO: Mostra rilevazioni solo di sensori attivi (case 13)
-    //TODO: Setta modOpe solo di attuatori attivi (case 14)
-    //TODO: Input di sensori/attuatori attivi a regole (case 5 fruit) , time e start(
-    // ENABLED --> IF s1_sens.tempe < 100 THEN a1_sw := on , start := 15.10
-    // DISABLED --> IF time > 15.00 THEN a2_sw := on)
-
-    public static void main(String[] args) {
+    public synchronized static void main(String[] args) {
 
         UnitaImmobiliare unitaImmobiliare = new UnitaImmobiliare();
         ArrayList<UnitaImmobiliare> listaUnitaImmobiliari = new ArrayList<>();
@@ -1613,8 +1605,10 @@ public class Main {
         }
     }
 
+
     public static String getOraCorrente() {
         return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "." + Calendar.getInstance().get(Calendar.MINUTE);
     }
+
 
 }

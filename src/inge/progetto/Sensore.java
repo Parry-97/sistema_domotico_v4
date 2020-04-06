@@ -110,7 +110,7 @@ public class Sensore {
 
         return null;
     }
-    //TODO: Modificare anche in v3
+    
     public void aggiornaInfo(){
         for (Informazione info : this.rilevazioni) {
             if (info instanceof ModalitaOperativa)
