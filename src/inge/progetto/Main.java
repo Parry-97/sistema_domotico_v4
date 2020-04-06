@@ -3,6 +3,7 @@ package inge.progetto;
 import it.unibs.fp.mylib.*;
 
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
 
 
@@ -766,15 +767,16 @@ public class Main {
 
                             boolean siSen = false;
 
-                            System.out.println("\n...SENSORI ATTUALMENTE CREATI...");
+                            System.out.println("\n...SENSORI ATTUALMENTE CREATI E ATTIVI...");
 
                             for (Sensore s : unitaImmobiliare.getListaSensori()) {
-                                System.out.println("--- Nome sensore: " + s.getNome());
+                                if(s.isAttivo())
+                                    System.out.println("--- Nome sensore: " + s.getNome());
                             }
 
                             String ss = InputDati.leggiStringa("Inserisci il nome del sensore sul quale si vogliono leggere i dati: ");
                             for (Sensore sensore : unitaImmobiliare.getListaSensori()) {
-                                if (sensore.getNome().equals(ss)) {
+                                if (sensore.getNome().equals(ss) && sensore.isAttivo()) {
                                     siSen = true;
                                     for (Informazione info : sensore.getRilevazioni()) {
                                         System.out.println(info);
@@ -783,7 +785,7 @@ public class Main {
                                 }
                             }
                             if (!siSen)
-                                System.out.println("XXX Sensore non presente. E' necessario crearlo XXX");
+                                System.out.println("XXX Sensore non presente. E' necessario crearlo o attivarlo perchè disattivato XXX");
 
                             unitaImmobiliare.refreshLetture();
 
@@ -802,14 +804,15 @@ public class Main {
                             boolean siAttua = false;
                             boolean siMod = false;
 
-                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI...");
+                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI E ATTIVI...");
                             for (Attuatore attr : unitaImmobiliare.getListaAttuatori()) {
-                                System.out.println("--- Nome attuatore: " + attr.getNome());
+                                if(attr.isAttivo())
+                                    System.out.println("--- Nome attuatore: " + attr.getNome());
                             }
 
                             String nomeAtt = InputDati.leggiStringa("Inserisci il nome dell'attuatore al quale si vuole modificare la modalià operativa: ");
                             for (Attuatore a : unitaImmobiliare.getListaAttuatori()) {
-                                if (a.getNome().equals(nomeAtt)) {
+                                if (a.getNome().equals(nomeAtt) && a.isAttivo()) {
                                     siAttua = true;
 
                                     System.out.println("Attuatore: " + a.getNome() + ", modalità operativa attuale: " + a.getModalitaAttuale());
@@ -846,7 +849,7 @@ public class Main {
                                 }
                             }
                             if (!siAttua) {
-                                System.out.println("!!! L'attuatore non esiste. E' necessario crearlo !!!");
+                                System.out.println("!!! L'attuatore non esiste. E' necessario crearlo o attivarlo perchè disattivato !!!");
                                 break;
                             }
                             if (!siMod) {
@@ -903,7 +906,11 @@ public class Main {
                                             System.out.println("Lista sensori attualmente vuota. E' necessario crearne di nuovi per utilizzare questa funzione");
                                         else {
                                             for (Sensore s : unitaImmobiliare.getListaSensori()) {
-                                                System.out.println("Nome Sensore: " + s.getNome());
+                                                System.out.print("Nome Sensore: " + s.getNome() + ", ");
+                                                if(s.isAttivo())
+                                                    System.out.println("Attivo");
+                                                else
+                                                    System.out.println("Disattivo");
                                             }
                                         }
                                         if (listaCategoriaSensori.isEmpty())
@@ -920,7 +927,11 @@ public class Main {
                                             System.out.println("Lista attuatori attualmente vuota. E' necessario crearne di nuovi per utilizzare questa funzione");
                                         else {
                                             for (Attuatore att : unitaImmobiliare.getListaAttuatori()) {
-                                                System.out.println("Nome Attuatore: " + att.getNome());
+                                                System.out.print("Nome Attuatore: " + att.getNome() + " , ");
+                                                if(att.isAttivo())
+                                                    System.out.println("Attivo");
+                                                else
+                                                    System.out.println("Disattivo");
                                             }
                                         }
                                         if (listaCategoriaAttuatori.isEmpty())
@@ -984,7 +995,7 @@ public class Main {
                 RuleParser ruleParser = new RuleParser();
 
                 do {
-                    if (contatoreOperazioni == 4 && !unitaImmobiliare.getTipo().equals("")) {
+                    if (contatoreOperazioni == 10 && !unitaImmobiliare.getTipo().equals("")) {
                         ruleParser.applyRules(unitaImmobiliare.getListaSensori(),unitaImmobiliare.getListaAttuatori());
                         contatoreOperazioni = 0;
                         unitaImmobiliare.refreshLetture();
@@ -992,7 +1003,8 @@ public class Main {
                     }
                     contatoreOperazioni++;
                     System.out.println("\n1) SELEZIONARE UN'UNITA' IMMOBILIARE PER EFFETTUARE LE OPERAZIONI DESIDERATE\n2) MOSTRA RILEVAZIONI DI UN SENSORE\n" +
-                            "3) SETTA NUOVA MODALITA' ATTUATORE\n4) VISUALIZZA TUTTO\n5) CREA NUOVA REGOLA\n0) USCITA\n");
+                            "3) SETTA NUOVA MODALITA' ATTUATORE\n4) VISUALIZZA TUTTO\n5) CREA NUOVA REGOLA\n6) ATTIVA SENSORE\n7) DISATTIVA SENSORE\n" +
+                            "8) ATTIVA ATTUATORE\n9) DISATTIVA ATTUATORE\n10) ABILITA/DISABILITA REGOLE\n0) USCITA\n");
                     caso = InputDati.leggiIntero("# Seleziona funzionalità: ");
 
                     switch (caso) {
@@ -1048,15 +1060,16 @@ public class Main {
 
                             boolean siSen = false;
 
-                            System.out.println("\n...SENSORI ATTUALMENTE CREATI DAL MANUTENTORE...");
+                            System.out.println("\n...SENSORI ATTUALMENTE CREATI DAL MANUTENTORE E ATTUALMENTE ATTIVI...");
 
                             for (Sensore s : unitaImmobiliare.getListaSensori()) {
-                                System.out.println("--- Nome sensore: " + s.getNome());
+                                if(s.isAttivo())
+                                    System.out.println("--- Nome sensore: " + s.getNome());
                             }
 
                             String ss = InputDati.leggiStringa("Inserisci il nome del sensore sul quale si vogliono leggere i dati: ");
                             for (Sensore sensore : unitaImmobiliare.getListaSensori()) {
-                                if (sensore.getNome().equals(ss)) {
+                                if (sensore.getNome().equals(ss) && sensore.isAttivo()) {
                                     siSen = true;
                                     for (Informazione info : sensore.getRilevazioni()) {
                                         System.out.println(info);
@@ -1065,7 +1078,7 @@ public class Main {
                                 }
                             }
                             if (!siSen)
-                                System.out.println("XXX Sensore non presente. E' necessario crearlo XXX");
+                                System.out.println("XXX Sensore non presente. E' necessario crearlo o attivarlo perchè disattivo XXX");
 
                             unitaImmobiliare.refreshLetture();
 
@@ -1084,14 +1097,15 @@ public class Main {
                             boolean siAttua = false;
                             boolean siMod = false;
 
-                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI DAL MANUTENTORE...");
+                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI DAL MANUTENTORE E ATTIVI...");
                             for (Attuatore attr : unitaImmobiliare.getListaAttuatori()) {
-                                System.out.println("--- Nome attuatore: " + attr.getNome());
+                                if(attr.isAttivo())
+                                    System.out.println("--- Nome attuatore: " + attr.getNome());
                             }
 
                             String nomeAtt = InputDati.leggiStringa("Inserisci il nome dell'attuatore al quale si vuole modificare la modalià operativa: ");
                             for (Attuatore a : unitaImmobiliare.getListaAttuatori()) {
-                                if (a.getNome().equals(nomeAtt)) {
+                                if (a.getNome().equals(nomeAtt) && a.isAttivo()) {
                                     siAttua = true;
 
 
@@ -1127,7 +1141,7 @@ public class Main {
                                 }
                             }
                             if (!siAttua) {
-                                System.out.println("!!! L'attuatore non esiste. E' necessario crearlo !!!");
+                                System.out.println("!!! L'attuatore non esiste. E' necessario crearlo o attivarlo perchè disattivo !!!");
                                 break;
                             }
                             if (!siMod) {
@@ -1139,7 +1153,7 @@ public class Main {
                         case 4:
                             int sceltaVisualizza;
                             do {
-                                if (contatoreOperazioni == 4 && !unitaImmobiliare.getTipo().equals("")) {
+                                if (contatoreOperazioni == 10 && !unitaImmobiliare.getTipo().equals("")) {
                                     ruleParser.applyRules(unitaImmobiliare.getListaSensori(),unitaImmobiliare.getListaAttuatori());
                                     contatoreOperazioni = 0;
                                     unitaImmobiliare.refreshLetture();
@@ -1191,7 +1205,11 @@ public class Main {
                                             System.out.println("Lista sensori attualmente vuota. E' necessario crearne di nuovi per utilizzare questa funzione");
                                         else {
                                             for (Sensore s : unitaImmobiliare.getListaSensori()) {
-                                                System.out.println("Nome Sensore: " + s.getNome());
+                                                System.out.print("Nome Sensore: " + s.getNome() + ", ");
+                                                if(s.isAttivo())
+                                                    System.out.println("Attivo");
+                                                else
+                                                    System.out.println("Disattivo");
                                             }
                                         }
                                         if (listaCategoriaSensori.isEmpty())
@@ -1208,7 +1226,11 @@ public class Main {
                                             System.out.println("Lista attuatori attualmente vuota. E' necessario crearne di nuovi per utilizzare questa funzione");
                                         else {
                                             for (Attuatore att : unitaImmobiliare.getListaAttuatori()) {
-                                                System.out.println("Nome Attuatore: " + att.getNome());
+                                                System.out.print("Nome Attuatore: " + att.getNome() + " , ");
+                                                if(att.isAttivo())
+                                                    System.out.println("Attivo");
+                                                else
+                                                    System.out.println("Disattivo");
                                             }
                                         }
                                         if (listaCategoriaAttuatori.isEmpty())
@@ -1246,8 +1268,6 @@ public class Main {
 
                             break;
                         case 5:
-
-
                             if (unitaImmobiliare.getTipo().equals("")) {
                                 System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
                                 break;
@@ -1286,15 +1306,16 @@ public class Main {
                                 boolean siSens = false;
                                 String nomeSensore;
                                 do {
-                                    nomeSensore = InputDati.leggiStringa("Inserisci il nome del sensore sul quale applicare la regola: ");
+                                    nomeSensore = InputDati.leggiStringa("Inserisci il nome del sensore sul quale applicare la regola " +
+                                            "oppure time per impostare un'orario di attivazione della regola: ");
                                     for (Sensore sensore : unitaImmobiliare.getListaSensori()) {
-                                        if (sensore.getNome().equals(nomeSensore) || nomeSensore.equals("true")) {
+                                        if (sensore.getNome().equals(nomeSensore) || nomeSensore.equals("true") || nomeSensore.equals("time")) {
                                             siSens = true;
                                             break;
                                         }
                                     }
                                 } while (!siSens);
-                                if(!nomeSensore.equals("true")) {
+                                if(!nomeSensore.equals("true") && !nomeSensore.equals("time")) {
                                     for (Sensore s : unitaImmobiliare.getListaSensori()) {
                                         if (s.getNome().equals(nomeSensore)) {
                                             System.out.println("\n...INFORMAZIONI ATTUALMENTE CREATE DAL MANUTENTORE PER QUESTO SENSORE...");
@@ -1341,7 +1362,7 @@ public class Main {
 
                                 boolean scelta = false;
 
-                                if(!nomeSensore.equals("true")) {
+                                if(!nomeSensore.equals("true") && !nomeSensore.equals("time")) {
                                     if (unitaImmobiliare.getListaSensori().size() > 1) {
                                         for(Sensore sens : unitaImmobiliare.getListaSensori()) {
                                             if(!sens.getNome().equals(nomeSensore)) {
@@ -1432,13 +1453,40 @@ public class Main {
                                         }
                                     }
                                 } else {
-                                    proseguire = InputDati.yesOrNo("Si vuole aggiungere un'altra condizione per la seguente regola?");
-                                    if (proseguire) {
-                                        System.out.println("Operatori logici consentinti: AND, OR");
+                                    if (nomeSensore.equals("true")) {
+                                            proseguire = InputDati.yesOrNo("Si vuole aggiungere un'altra condizione per la seguente regola?");
+                                        if (proseguire) {
+                                            System.out.println("Operatori logici consentinti: AND, OR");
+                                            do {
+                                                logico = InputDati.leggiStringa("Inserisci il tipo di operatore logico: ");
+                                            } while (!logico.equals("AND") && !logico.equals("OR"));
+                                            regola += logico + " ";
+                                        }
+                                    } else {
+                                        System.out.println("\nOperazioni consentite(con dato di tipo orario):\n" +
+                                                "Uguale(=), Maggiore(>), Minore(<), Maggiore-Uguale(>=), Minore-Uguale(<=)");
                                         do {
-                                            logico = InputDati.leggiStringa("Inserisci il tipo di operatore logico: ");
-                                        } while (!logico.equals("AND") && !logico.equals("OR"));
-                                        regola += logico + " ";
+                                            op = InputDati.leggiStringa("Inserisci il tipo di operazione da effettuare: ");
+                                        } while (!op.equals("=") && !op.equals(">") && !op.equals("<") && !op.equals(">=") && !op.equals("<="));
+                                        //TODO: mettere tipo dato string in ora e minuti, cambiare controlli while anche per attuatore!!!
+                                        int ora;
+                                        int minuti;
+                                        do {
+                                            ora = InputDati.leggiIntero("Inserisci l'ora di attivazione della regola: ");
+                                        } while(ora < 0 || ora > 23);
+                                        do {
+                                            minuti = InputDati.leggiIntero("Ed inserisci a che minuto minuti atttivare la regola: ");
+                                        } while(minuti < 0 || minuti > 59);
+                                        regola += op + " " + ora + "." + minuti + " ";
+
+                                        proseguire = InputDati.yesOrNo("Si vuole aggiungere un'altra condizione per la seguente regola?");
+                                        if (proseguire) {
+                                            System.out.println("Operatori logici consentinti: AND, OR");
+                                            do {
+                                                logico = InputDati.leggiStringa("Inserisci il tipo di operatore logico: ");
+                                            } while (!logico.equals("AND") && !logico.equals("OR"));
+                                            regola += logico + " ";
+                                        }
                                     }
                                 }
 
@@ -1534,6 +1582,21 @@ public class Main {
                                     }
                                 }
                                 regola += attuatore + modalita;
+                                //TODO: mettere tipo dato string in ora e minuti, cambiare controlli while anche per attuatore!!!
+                                boolean orario = InputDati.yesOrNo("Si desidera impostare l'orario di settaggio della nuova modalià operativa?");
+                                if(orario) {
+                                    regola += " , start := ";
+                                    int ora;
+                                    int minuti;
+                                    do {
+                                        ora = InputDati.leggiIntero("Inserisci l'ora di attivazione della regola: ");
+                                    } while(ora < 0 || ora > 23);
+                                    do {
+                                        minuti = InputDati.leggiIntero("Ed inserisci a che minuto minuti atttivare la regola: ");
+                                    } while(minuti < 0 || minuti > 59);
+
+                                    regola += ora + "." + minuti;
+                                }
 
                                 int contaDisponibili = 0;
                                 for (Attuatore act : unitaImmobiliare.getListaAttuatori()) {
@@ -1555,6 +1618,195 @@ public class Main {
 
                             System.out.println("+++ Regola inserita: " + regola);
                             ruleParser.writeRuleToFile(regola,true);
+
+                            break;
+                        case 6:
+                            if (unitaImmobiliare.getTipo().equals("")) {
+                                System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
+                                break;
+                            }
+
+                            if (unitaImmobiliare.getListaSensori().isEmpty()) {
+                                System.out.println("XX Non sono presenti sensori da cui poter leggere rilevazioni XX");
+                                break;
+                            }
+
+                            boolean dis = false;
+                            String nomeSens = "";
+                            System.out.println("\n...SENSORI ATTUALMENTE CREATI DAL MANUTENTORE E DISATTIVI...");
+
+                            for (Sensore s : unitaImmobiliare.getListaSensori()) {
+                                if (!s.isAttivo()) {
+                                    System.out.println("--- Nome sensore: " + s.getNome());
+                                    dis = true;
+                                }
+                            }
+
+                            if(dis) {
+                                boolean esci = false;
+                                do {
+                                    nomeSens = InputDati.leggiStringa("Inserisci il nome del sensore che si desidera attivare: ");
+                                    for(Sensore s : unitaImmobiliare.getListaSensori()) {
+                                        if(s.getNome().equals(nomeSens)) {
+                                            s.setStatoAttivazione(true);
+                                            System.out.println("*** Sensore attivato correttamente ***");
+                                            esci = true;
+                                            break;
+                                        }
+                                    }
+                                } while (!esci);
+                                ruleParser.abilitaRegoleconDispositivo(nomeSens, unitaImmobiliare.getListaSensori(), unitaImmobiliare.getListaAttuatori());
+                            } else
+                                System.out.println("XX non sono presenti sensori disattivi al momento XX");
+
+                            break;
+                        case 7:
+                            if (unitaImmobiliare.getTipo().equals("")) {
+                                System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
+                                break;
+                            }
+
+                            if (unitaImmobiliare.getListaSensori().isEmpty()) {
+                                System.out.println("XX Non sono presenti sensori da cui poter leggere rilevazioni XX");
+                                break;
+                            }
+
+                            boolean att = false;
+                            String nomeSenso = "";
+                            System.out.println("\n...SENSORI ATTUALMENTE CREATI DAL MANUTENTORE E ATTIVI...");
+
+                            for (Sensore s : unitaImmobiliare.getListaSensori()) {
+                                if (s.isAttivo()) {
+                                    System.out.println("--- Nome sensore: " + s.getNome());
+                                    att = true;
+                                }
+                            }
+
+                            if(att) {
+                                boolean esci = false;
+                                do {
+                                    nomeSenso = InputDati.leggiStringa("Inserisci il nome del sensore che si desidera disattivare: ");
+                                    for(Sensore s : unitaImmobiliare.getListaSensori()) {
+                                        if(s.getNome().equals(nomeSenso)) {
+                                            s.setStatoAttivazione(false);
+                                            System.out.println("*** Sensore disattivato correttamente ***");
+                                            esci = true;
+                                            break;
+                                        }
+                                    }
+                                } while (!esci);
+                                ruleParser.disabilitaRegolaConDispositivo(nomeSenso);
+                            } else
+                                System.out.println("XX non sono presenti sensori attivi al momento XX");
+
+                            break;
+                        case 8:
+                            if (unitaImmobiliare.getTipo().equals("")) {
+                                System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
+                                break;
+                            }
+
+                            if (unitaImmobiliare.getListaAttuatori().isEmpty()) {
+                                System.out.println("XX Non sono presenti attuatori con cui poter interagire XX");
+                                break;
+                            }
+
+                            boolean disa = false;
+                            String nomeAttu = "";
+                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI DAL MANUTENTORE E DISATTIVI...");
+
+                            for (Attuatore a : unitaImmobiliare.getListaAttuatori()) {
+                                if (!a.isAttivo()) {
+                                    System.out.println("--- Nome Attuatore: " + a.getNome());
+                                    disa = true;
+                                }
+                            }
+
+                            if(disa) {
+                                boolean esci = false;
+                                do {
+                                    nomeAttu = InputDati.leggiStringa("Inserisci il nome dell'attuatore che si desidera attivare: ");
+                                    for(Attuatore a : unitaImmobiliare.getListaAttuatori()) {
+                                        if(a.getNome().equals(nomeAttu)) {
+                                            a.setStatoAttivazione(true);
+                                            System.out.println("*** Attuatore attivato correttamente ***");
+
+                                            esci = true;
+                                            break;
+                                        }
+                                    }
+                                } while (!esci);
+                                ruleParser.abilitaRegoleconDispositivo(nomeAttu, unitaImmobiliare.getListaSensori(), unitaImmobiliare.getListaAttuatori());
+                            } else
+                                System.out.println("XX non sono presenti attuatori disattivi al momento XX");
+
+                            break;
+                        case 9:
+                            if (unitaImmobiliare.getTipo().equals("")) {
+                                System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
+                                break;
+                            }
+
+                            if (unitaImmobiliare.getListaAttuatori().isEmpty()) {
+                                System.out.println("XX Non sono presenti attuatori con cui poter interagire XX");
+                                break;
+                            }
+
+                            boolean attiv = false;
+                            String nomeAttua = "";
+                            System.out.println("\n...ATTUATORI ATTUALMENTE CREATI DAL MANUTENTORE E ATTIVI...");
+
+                            for (Attuatore a : unitaImmobiliare.getListaAttuatori()) {
+                                if (a.isAttivo()) {
+                                    System.out.println("--- Nome Attuatore: " + a.getNome());
+                                    attiv = true;
+                                }
+                            }
+
+                            if(attiv) {
+                                boolean esci = false;
+                                do {
+                                    nomeAttua = InputDati.leggiStringa("Inserisci il nome dell'attuatore che si desidera disattivare: ");
+                                    for(Attuatore a : unitaImmobiliare.getListaAttuatori()) {
+                                        if(a.getNome().equals(nomeAttua)) {
+                                            a.setStatoAttivazione(false);
+                                            System.out.println("*** Attuatore disattivato correttamente ***");
+                                            esci = true;
+                                            break;
+                                        }
+                                    }
+                                } while (!esci);
+                                ruleParser.disabilitaRegolaConDispositivo(nomeAttua);
+                            } else
+                                System.out.println("XX non sono presenti attuatori attivi al momento XX");
+
+                            break;
+                        case 10:
+                            System.out.println();
+                            System.out.println("\n...REGOLE ATTUALMENTE CREATE PER QUESTA UNITA' IMMOBILIARE...");
+                            String readRuless = ruleParser.readRuleFromFile();
+
+                            if (readRuless.equals("")) {
+                                System.out.println("XX Non sono state definite regole per l'unita immobiliare selezionata XX\n");
+                                break;
+                            }
+                            else {
+                                String[] regole = ruleParser.readRuleFromFile().split("\n");
+
+                                for (int i = 0; i < regole.length; i++) {
+                                    System.out.println(i+1 + ") " + regole[i]);
+                                }
+                                System.out.println();
+                                int riga;
+                                do {
+                                    riga = InputDati.leggiIntero("Indicare la riga della regola che si vuole attivare o disattivare: ");
+                                } while(riga < 0 || riga > regole.length);
+
+                                boolean oper = InputDati.yesOrNo("Inserire se si vuole abilitare(S) o disabilitare(N) la regola");
+
+                                ruleParser.cambiaAbilitazioneRegola(regole[riga-1], oper);
+                                System.out.println("*** Operazione eseguita correttamente ***");
+                            }
 
                             break;
                         case 0:
