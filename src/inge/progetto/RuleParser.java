@@ -40,6 +40,10 @@ public class RuleParser {
         }
     }
 
+    /**
+     * Viene effettuata la lettura da file per recuperare la lista delle regole create dal fruitore.
+     * @return la lettura delle regole dal file dell'unità immobiliare corrente
+     */
     public String readRuleFromFile() {
 
         StringBuilder output = new StringBuilder();
@@ -69,6 +73,11 @@ public class RuleParser {
         return output.toString();
     }
 
+    /**
+     * Il metodo applica le regole presenti nella sezione conseguente di una regola quando l'antecedente risulta true.
+     * @param listaSensori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     * @param listaAttuatori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     */
     public void applyRules(ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         String readRules = this.readRuleFromFile();
 
@@ -158,6 +167,11 @@ public class RuleParser {
         }
     }
 
+    /**
+     * Il metodo isola una singola azione e la passa al metodo che applica le singole regole.
+     * @param token sezione di azione da eseguire
+     * @param listaAttuatori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     */
     private void applyActions(String token, ArrayList<Attuatore> listaAttuatori) {
         for (String tok : token.split(" ; "))
             if (tok.contains("start")) {
@@ -180,6 +194,11 @@ public class RuleParser {
         return cal.getTime();
     }
 
+    /**
+     * Il metodo applica la regola vera e propria, settando il nuovo valoro della modalità operativa dell'attuatore.
+     * @param act azione da effettuare.
+     * @param listaAttuatori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     */
     private synchronized void apply(String act, ArrayList<Attuatore> listaAttuatori) {
         String[] toks = act.split(" := ");
 
@@ -208,6 +227,13 @@ public class RuleParser {
 
     }
 
+    /**
+     * Il metodo utilizza gli operatori logici per separare la stringa delle condizioni e verificare singolarmente le varie operazioni e poi applicare
+     * gli operatori logici di AND e OR.
+     * @param cos è la condizione affinchè una regola si verifichi.
+     * @param listaSensori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     * @return
+     */
     private boolean calculate(String cos, ArrayList<Sensore> listaSensori) {
         if (cos.equals("true"))
             return true;
@@ -221,7 +247,7 @@ public class RuleParser {
             String[] expTok = cos.split(" AND ", 2);
             return calculate(expTok[0], listaSensori) && calculate(expTok[1], listaSensori);
         }
-        if (cos.matches("time ([<>=]|<=|>=) ([0-1]?[0-9]|2[0-3])(\\.)[0-5][0-9]")) {
+        if (cos.matches("time ([<>=]|<=|>=) ([0-1]?[0-9]|2[0-3])(\\.)[0-5]?[0-9]")) {
             return evalTimeExp(cos.split(" "));
         }
 
@@ -256,6 +282,13 @@ public class RuleParser {
         }
 
     }
+
+    /**
+     *Il metodo viene usato per acquisire i valori dei sensori in gioco e per confrontare l'effettiva operazione tra due sensori o tra un sensore e un valore numerico costante
+     * o un astringa nel caso di un'informazione non numerica
+     * @param listaSensori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     * @return il risultato dell'operazione in termini di true se le operazioni sono verificate altrimenti false se sono false
+     */
 
     private boolean getValExp(String[] toks, ArrayList<Sensore> listaSensori) {
         String var1 = toks[0];
@@ -343,6 +376,13 @@ public class RuleParser {
         return false;
     }
 
+    /**
+     * Il metodo effettua il risultato booleano dell'operazione logica tra i due valori con l'operatore designato.
+     * @param operator è l'operatore per il confronto della regola
+     * @param value1 valore di sx dell'operazione
+     * @param value2 valore di dx dell'operazione
+     * @return il confronto dell' operazione
+     */
     private boolean evalOp(String operator, int value1, int value2) {
         if (operator.startsWith("<")) {
             if (operator.endsWith("="))
@@ -363,7 +403,6 @@ public class RuleParser {
     }
 
 
-    //TODO: Far vedere la regola da cui deriva azione programmata
     //TODO: Gestire OUTPUT -> TRIGGER
     public class AzioneProgrammata extends TimerTask {
 
@@ -371,6 +410,7 @@ public class RuleParser {
         private String azione;
 
         public AzioneProgrammata(ArrayList<Attuatore> attuatori, String azione) {
+            System.out.println(Thread.currentThread().getName());
             this.attuatori = attuatori;
             this.azione = azione;
 
@@ -381,8 +421,8 @@ public class RuleParser {
         }
 
         @Override
-        public void run() {
-            System.out.println("\n...AZIONE PROGRAMMATA ORARIO " + getOraCorrente() + "...");
+        public synchronized void run() {
+            System.out.println("\n\n...AZIONE PROGRAMMATA ORARIO " + getOraCorrente() + "...");
             apply(this.azione, this.attuatori);
             timer.eliminaTask(azione);
         }
