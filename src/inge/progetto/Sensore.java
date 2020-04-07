@@ -97,11 +97,20 @@ public class Sensore {
 
     }
 
+    /**
+     *
+     * Dopo l'aggiornamento dei dati, vengono settate le nuove rilevazioni acquisite.
+     */
     public void modificaRilevazione(Informazione info1, Informazione info2) {
         if (rilevazioni.contains(info1))
             rilevazioni.set(rilevazioni.indexOf(info1),info2);
     }
 
+    /**
+     *
+     * @param nome dell'informazione che acquisisce un sensore
+     * @return la rilevazione letta da parte di un sensore.
+     */
     public Informazione getInformazione(String nome) {
         for (Informazione info : this.rilevazioni) {
             if (info.getNome().equals(nome))
@@ -111,6 +120,10 @@ public class Sensore {
         return null;
     }
 
+    /**
+     *
+     * Viene effettuata un aggiornamento dei dati letti da parte dei sensori.
+     */
     public void aggiornaInfo(){
         for (Informazione info : this.rilevazioni) {
             if (info instanceof ModalitaOperativa)
