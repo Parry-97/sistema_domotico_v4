@@ -13,6 +13,10 @@ public class Informazione implements Serializable {
 
 
     private String nome;
+
+    /**
+     * Tipo dell'informazione che il sensore acquisisce. N = numerica, NN = non numerica.
+     */
     private String tipo;
 
     protected Object valore;
