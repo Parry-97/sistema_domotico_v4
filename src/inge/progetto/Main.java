@@ -723,7 +723,7 @@ public class Main {
 
                                         if (!se.getCategoria().isFisico() || s.getListaSensori().contains(se))
                                             continue;
-                                        visualizzaLS.append("--- Nome sensore: ").append(se.getNome());
+                                        visualizzaLS.append("--- Nome sensore: ").append(se.getNome()).append("\n");
                                     }
 
                                     if (visualizzaLS.length() > 0)
@@ -1007,7 +1007,6 @@ public class Main {
 
                     switch (caso) {
 
-
                         case 1:
                             if (listaUnitaImmobiliari.isEmpty()) {
                                 System.out.println("XX Non è stata definita alcuna unità immobiliare per poter interagire con il sistema XX");
@@ -1032,7 +1031,7 @@ public class Main {
                                         if (immo.getNome().equals(seleziona)) {
                                             presente = true;
                                             unitaImmobiliare = immo;
-                                            ruleParser.setUp(seleziona+".txt",immo.getListaSensori(),immo.getListaAttuatori());
+                                            ruleParser.setUp(seleziona+".txt");
                                             break;
                                         }
                                     }
@@ -1781,6 +1780,12 @@ public class Main {
                             break;
                         case 10:
                             System.out.println();
+
+                            if (unitaImmobiliare.getTipo().equals("")) {
+                                System.out.println("!!! Unità Immobiliare non creata. E' necessario che il manutentore ne definisca una prima di questa operazione !!!");
+                                break;
+                            }
+
                             System.out.println("\n...REGOLE ATTUALMENTE CREATE PER QUESTA UNITA' IMMOBILIARE...");
                             String readRuless = ruleParser.readRuleFromFile();
 

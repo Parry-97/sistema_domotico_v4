@@ -130,13 +130,14 @@ public class Attuatore {
             System.out.println("*** Sei già in questa modalità ***");
             return;
         }
+
+        if (this.listaComandati.isEmpty()) {
+            System.out.println("--- L'attuatore non comanda alcun artefatto! ---");
+        }
         for (ModalitaOperativa mod : this.getCategoria().getModalita()) {
             if(mod.getValore().equals(nuovaModalita)) {
                 this.modalitaAttuale = nuovaModalita;
-
-
-
-                modificaArtefatti(new ModalitaOperativa(nuovaModalita)); //conseguente cambiamento di stato degli artefatti comandati
+                modificaArtefatti(new ModalitaOperativa(nuovaModalita));
 
                 System.out.println("*** Modalità modificata correttamente ***");
                 return;
@@ -157,15 +158,22 @@ public class Attuatore {
         if(this.modalitaAttuale.equals(nuovaModalita)) {
             System.out.println("Sei già in questa modalità");
         }
+
+        if(this.listaComandati.isEmpty()) {
+            System.out.println("--- L'attuatore non comanda alcun artefatto! ---");
+        }
+
         for (ModalitaOperativa mod : this.getCategoria().getModalita()) {
             if(mod.getValore().equals(nuovaModalita)) {
                 this.modalitaAttuale = nuovaModalita;
 
-                HashMap<String, Integer> nuoviParam = (HashMap<String, Integer>) mod.getParametri().clone();
-                ModalitaOperativa nuovaMod = new ModalitaOperativa(nuovaModalita, nuoviParam);
-                nuovaMod.setParametro(nomeParametro, valoreParametro);
-
-                modificaArtefatti(nuovaMod);
+                try {
+                    ModalitaOperativa nuovaMod = (ModalitaOperativa) mod.clone();
+                    nuovaMod.setParametro(nomeParametro, valoreParametro);
+                    modificaArtefatti(nuovaMod);
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
 
                 System.out.println("*** Modalità modificata correttamente ***");
                 return;
