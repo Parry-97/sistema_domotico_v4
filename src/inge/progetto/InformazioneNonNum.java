@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * @author Parampal Singh, Mattia Nodari
  */
 public class InformazioneNonNum extends Informazione
-                                implements Serializable {
+                                implements Serializable, Cloneable {
     /**
      * Insieme di valori scalari(stringhe) che definiscono il dominio non numerico dell'informazione
      */
@@ -67,5 +67,12 @@ public class InformazioneNonNum extends Informazione
     @Override
     public String toString() {
         return "[ Nome informazione: " + super.getNome() + " | Rilevazione: " + this.getValore() + " ]";
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        InformazioneNonNum cloned = (InformazioneNonNum) super.clone();
+        cloned.setDominioNonNumerico(this.dominioNonNumerico);
+        return cloned;
     }
 }

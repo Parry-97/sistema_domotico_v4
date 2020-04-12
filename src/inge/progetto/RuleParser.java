@@ -6,23 +6,29 @@ import java.util.*;
 import static inge.progetto.Main.getOraCorrente;
 
 public class RuleParser {
-
+    /** nome file contenente le regole di un'unità immobiliare*/
     private String fileName;
+
     private MyTimer timer;
 
     public RuleParser() {
         this.fileName = "";
     }
 
-    public void setUp(String fileName, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
+    public void setUp(String fileName) {
         this.fileName = fileName;
         this.timer = new MyTimer("TimerThread");
     }
 
+    /** elimina i dati relativi al time attuale */
     public void stopTimer() {
         this.timer.cancel();
     }
 
+    /**
+     * La funziona viene utilizzata per scrivere le regole create dal fruitore su un file
+     * @param text è il testo che andrà ad essere scritto sul file
+     */
     public void writeRuleToFile(String text, boolean append) {
         if (fileName.isEmpty())
             return;
@@ -104,6 +110,14 @@ public class RuleParser {
         }
     }
 
+    /**
+     *  Il metodo verifica l'abilitazione di un dispositivo, se questo viene disattivato, si disattiverà anche la regola
+     *  nella quale viene utulizatto il dispositivo di riferimento
+     * @param regola la regola che verrà attivata o disattivata in base all'attivazione o meno del dispositivo selezionato
+     * @param listaSensori lista sensori dell'unità immobiliare corrente
+     * @param listaAttuatori lista attuatori dell'unità immobiliare corrente
+     * @return
+     */
     private boolean verificaAbilitazione(String regola, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         for (Sensore sens : listaSensori) {
             if (!sens.isAttivo() && regola.contains(sens.getNome())) {
@@ -120,6 +134,11 @@ public class RuleParser {
         return true;
     }
 
+    /**
+     * Metodo che cambia l'abilitazione di una regola
+     * @param target regola che viene presa in considerazione
+     * @param abil nuovo parametro che rende attiva o disattiva una regola
+     */
     public void cambiaAbilitazioneRegola(String target, boolean abil) {
         String[] letto = readRuleFromFile().split("\n");
 
@@ -147,6 +166,12 @@ public class RuleParser {
         writeRuleToFile(regoleModificate, false);
     }
 
+    /**
+     * Metodo che abilita un dispositivo passato come paramentro
+     * @param nomeDispositivo nome del sensore o attuatore che viene abilitato
+     * @param listaSensori lista sensori dell'unità immobiliare corrente
+     * @param listaAttuatori lista attuatori dell'unità immobiliare corrente
+     */
     public void abilitaRegoleconDispositivo(String nomeDispositivo, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         String[] regole = readRuleFromFile().split("\n");
         for (int i = 0; i < regole.length; i++) {
@@ -158,6 +183,10 @@ public class RuleParser {
         }
     }
 
+    /**
+     * Metodo che disabilita un dipositivo passato come paramentro
+     * @param nomeDispositivo nome del sensore o attuatore da disabilitare
+     */
     public void disabilitaRegolaConDispositivo(String nomeDispositivo) {
         String[] regole = readRuleFromFile().split("\n");
         for (int i = 0; i < regole.length; i++) {
@@ -176,13 +205,19 @@ public class RuleParser {
         for (String tok : token.split(" ; "))
             if (tok.contains("start")) {
                 Date data = getTime(tok.split(" , ")[1].split(" := ")[1]);
-                if (data.compareTo(Calendar.getInstance().getTime()) > 0)
-                    this.timer.schedule(new AzioneProgrammata(listaAttuatori, tok.split(" , ")[0]), data);
+
+                this.timer.schedule(new AzioneProgrammata(listaAttuatori, tok.split(" , ")[0]), data);
+
             } else {
                 apply(tok, listaAttuatori);
             }
     }
 
+    /**
+     * Recupera il tempo corrente del sistema
+     * @param time
+     * @return il dato temporale al momento della chiamata del metodo
+     */
     private Date getTime(String time) {
         String[] timetokens = time.split("\\.");
         int hour = Integer.parseInt(timetokens[0]);
@@ -259,7 +294,7 @@ public class RuleParser {
         return false;
 
     }
-
+    
     private boolean evalTimeExp(String[] expTok) {
         Date currentDate = Calendar.getInstance().getTime();
         Date confDate = getTime(expTok[2]);
@@ -401,7 +436,6 @@ public class RuleParser {
 
         }
     }
-
 
     //TODO: Gestire OUTPUT -> TRIGGER
     public class AzioneProgrammata extends TimerTask {

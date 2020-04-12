@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * @author Parampal Singh, Mattia Nodari
  */
-public class Informazione implements Serializable {
+public class Informazione implements Serializable,Cloneable {
 
 
     private String nome;
@@ -103,6 +103,10 @@ public class Informazione implements Serializable {
         this.nome = nome;
     }
 
+    public void setValore(Object valore) {
+        this.valore = valore;
+    }
+
     @Override
     public String toString() {
         return "[" + this.nome + " : " + this.getValore() + "]";
@@ -114,5 +118,14 @@ public class Informazione implements Serializable {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Informazione clone = (Informazione) super.clone();
+        clone.setVALORE_MAX(this.getVALORE_MAX());
+        clone.setVALORE_MIN(this.getVALORE_MIN());
+        clone.setTipo(this.getTipo());
+        return clone;
     }
 }

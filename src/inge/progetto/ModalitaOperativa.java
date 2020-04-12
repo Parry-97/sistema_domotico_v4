@@ -16,7 +16,7 @@ import java.util.HashMap;
  * @see Informazione
  */
 public class ModalitaOperativa extends Informazione
-                                implements Serializable {
+                                implements Serializable, Cloneable {
 
 
     /**
@@ -108,5 +108,27 @@ public class ModalitaOperativa extends Informazione
      */
     public void setParametri(HashMap<String, Integer> parametri) {
         this.parametri = parametri;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+
+        ModalitaOperativa cloned = (ModalitaOperativa) super.clone();
+        cloned.setValore(""+this.valore);
+
+        HashMap<String, Integer> nuoviParam = new HashMap<>();
+        if (isParametrica()) {
+
+            HashMap<String, Integer> vecchiParam = this.getParametri();
+
+            for (String key : vecchiParam.keySet()) {
+                nuoviParam.put(key, vecchiParam.get(key));
+            }
+
+            cloned.setParametri(nuoviParam);
+        }
+        cloned.setParametri(nuoviParam);
+
+        return cloned;
     }
 }

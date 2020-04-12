@@ -1,29 +1,35 @@
 package inge.progetto;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Timer;
+import java.util.*;
 
 public class MyTimer extends Timer {
-    private ArrayList<String> azioniProgrammate;
+
+    private HashMap<String,Date> azioniProgrammate;
 
     public MyTimer(String name) {
         super(name);
-        this.azioniProgrammate = new ArrayList<>();
+        this.azioniProgrammate = new HashMap<>();
     }
 
-    //TODO: Consultare con scemo bianco se azione è programmata prima di quella gia programmata????
+    //TODO: Testare con esecuzione codice
     public void schedule(RuleParser.AzioneProgrammata task, Date time) {
+
+        if (time.compareTo(Calendar.getInstance().getTime()) < 0)
+            return;
+
         String azione = task.getAzione();
 
-        if (!azioniProgrammate.contains(azione)) {
-            azioniProgrammate.add(azione);
+        if (!azioniProgrammate.containsKey(azione)) {
+            azioniProgrammate.put(azione,time);
             super.schedule(task, time);
+        } else {
+            if (azioniProgrammate.get(azione).compareTo(time) != 0)
+                super.schedule(task,time);
+
         }
 
     }
-
     public void eliminaTask(String azione) {
-        this.azioniProgrammate.remove(azione);
+        azioniProgrammate.remove(azione);
     }
 }
