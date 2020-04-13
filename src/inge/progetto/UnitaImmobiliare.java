@@ -204,11 +204,16 @@ public class UnitaImmobiliare {
 
         StringBuilder visArte = new StringBuilder();
 
-        for(Stanza stanza : listaStanze) {
-            for (Artefatto artefatto : listaArtefatti) {
-                if(!stanza.getListaArtefatti().contains(artefatto))
-                    visArte.append(artefatto.visualizzaDispositivi());
+        for (Artefatto artefatto : listaArtefatti) {
+            boolean trovato = false;
+            for(Stanza stanza : listaStanze) {
+                if(stanza.getListaArtefatti().contains(artefatto)) {
+                    trovato = true;
+                    break;
+                }
             }
+            if(!trovato)
+                visArte.append(artefatto.visualizzaDispositivi());
         }
 
         if (visArte.length() > 0)
