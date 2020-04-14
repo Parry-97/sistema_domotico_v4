@@ -5,29 +5,50 @@ import java.util.*;
 
 import static inge.progetto.Main.getOraCorrente;
 
+/**
+ * Classe di utility usata per le varie operazioni di gestione delle regole, che esse vengano importate o generate interattivamente da un utente.
+ * Si occupa di salvataggio permanente delle regole o di ripristino/lettura da file per l'utente che interagisce con i vari componenti del sistema come unita immobiliari o dispositivi
+ * come sensori o attuatori . Inoltre è possibile anche importare infatti regole da file esterni purchè queste siano compatibili con la descrizione
+ * precedentemente fornita del sistema e che rispettino la grammatica e sintassi del sistema.
+ * Svolge appunto la funzione di parsing, ovvero traduce il formato testuale delle regole assegnate/inserite dall'utente in comandi o azioni con le
+ * quali modifica la configurazione di una determinata unita immobiliare agendo su singoli sensori e attuatori in essa presenti.
+ *
+ * @author Parampal Singh, Mattia Nodari
+ */
 public class RuleParser {
     /** nome file contenente le regole di un'unità immobiliare*/
     private String fileName;
 
+    /**
+     * timer/temporizzatore usato per azioni/assegnamenti programmatai da regole
+     */
     private MyTimer timer;
 
+    /**
+     * Costruttore di un'istanza RuleParser
+     */
     public RuleParser() {
         this.fileName = "";
     }
 
+    /**Permette di specificare il percorso del file da cui estrarre le regole
+     * @param fileName percorso del file
+     */
     public void setUp(String fileName) {
         this.fileName = fileName;
         this.timer = new MyTimer("TimerThread");
     }
 
-    /** elimina i dati relativi al time attuale */
+    /** elimina i dati relativi al timer attuale, cancellando eventuali azioni programmate */
     public void stopTimer() {
-        this.timer.cancel();
+        if (timer != null) {
+            this.timer.cancel();
+        }
     }
 
-    /**
-     * La funziona viene utilizzata per scrivere le regole create dal fruitore su un file
-     * @param text è il testo che andrà ad essere scritto sul file
+    /**Permette la scrittura di regola/e nel file dal percorso specficato in modo da salvare permanentemente
+     * @param text regola/e che si desiderano salvare
+     * @param append flag per decidere se sovrascivere il file o scrivere in coda
      */
     public void writeRuleToFile(String text, boolean append) {
         if (fileName.isEmpty())
@@ -110,13 +131,11 @@ public class RuleParser {
         }
     }
 
-    /**
-     *  Il metodo verifica l'abilitazione di un dispositivo, se questo viene disattivato, si disattiverà anche la regola
-     *  nella quale viene utulizatto il dispositivo di riferimento
-     * @param regola la regola che verrà attivata o disattivata in base all'attivazione o meno del dispositivo selezionato
-     * @param listaSensori lista sensori dell'unità immobiliare corrente
-     * @param listaAttuatori lista attuatori dell'unità immobiliare corrente
-     * @return
+    /** Verifica che la regola possa essere considerata abilitata o meno a seconda che abbia tutti dispositivi(attuatori e sensori) attivi
+     * @param regola regoal da verificare
+     * @param listaSensori lista di sensori con cui verificare l'abilitazione della regola
+     * @param listaAttuatori lista di sensori con cui verificare l'abilitazione della regola
+     * @return true se la regola è abilitata, false altrimenti
      */
     private boolean verificaAbilitazione(String regola, ArrayList<Sensore> listaSensori, ArrayList<Attuatore> listaAttuatori) {
         for (Sensore sens : listaSensori) {
@@ -213,10 +232,9 @@ public class RuleParser {
             }
     }
 
-    /**
-     * Recupera il tempo corrente del sistema
-     * @param time
-     * @return il dato temporale al momento della chiamata del metodo
+    /**Permette di ottenere ora da formato testuale hh.mm
+     * @param time formato testuale dell'ora
+     * @return istanza di {@link Date} che si puo utilizzare per programmare azioni
      */
     private Date getTime(String time) {
         String[] timetokens = time.split("\\.");
@@ -265,9 +283,10 @@ public class RuleParser {
     /**
      * Il metodo utilizza gli operatori logici per separare la stringa delle condizioni e verificare singolarmente le varie operazioni e poi applicare
      * gli operatori logici di AND e OR.
-     * @param cos è la condizione affinchè una regola si verifichi.
+     *
+     * @param cos          è la condizione affinchè una regola si verifichi.
      * @param listaSensori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
-     * @return
+     * @return il risultato di una determinata espressione booleana/antecedente
      */
     private boolean calculate(String cos, ArrayList<Sensore> listaSensori) {
         if (cos.equals("true"))
@@ -294,7 +313,11 @@ public class RuleParser {
         return false;
 
     }
-    
+
+    /**Valuta/Computa una disuguaglianza temporale, un confronto tra misure temporale: time(valore corrente) op(operatore) time2(istante temporale specificato)
+     * @param expTok disuguaglianza temporale da valutare
+     * @return il risultato della disuguaglianza
+     */
     private boolean evalTimeExp(String[] expTok) {
         Date currentDate = Calendar.getInstance().getTime();
         Date confDate = getTime(expTok[2]);
@@ -319,12 +342,13 @@ public class RuleParser {
     }
 
     /**
-     *Il metodo viene usato per acquisire i valori dei sensori in gioco e per confrontare l'effettiva operazione tra due sensori o tra un sensore e un valore numerico costante
-     * o un astringa nel caso di un'informazione non numerica
+     * Il metodo viene usato per acquisire i valori dei sensori in gioco e per confrontare l'effettiva operazione tra due sensori o tra un sensore e un valore numerico costante
+     * o una stringa nel caso di un'informazione non numerica
+     *
      * @param listaSensori dell'unità immobiliare sulla quale si stanno effettuando le operazioni
+     * @param toks componenti dell'espressione da valutare
      * @return il risultato dell'operazione in termini di true se le operazioni sono verificate altrimenti false se sono false
      */
-
     private boolean getValExp(String[] toks, ArrayList<Sensore> listaSensori) {
         String var1 = toks[0];
         String operator = toks[1];
@@ -436,20 +460,35 @@ public class RuleParser {
 
         }
     }
-
-    //TODO: Gestire OUTPUT -> TRIGGER
+    /**
+     * Classe innestata utilizzata per definire un'azione programmata in un istante temporale futuro specificato all'interno di una regola.
+     * Ad esempio, l’azione (a1_attLuciEsterne := spegnimento, start := 6.00) assegna la modalità di spegnimento all’attuatore a1 della
+     * categoria attLuciEsterne esattamente alle ore 6.00. Il sistema 'mette in coda' tale azione e la esegue esattamente all'ora specificata
+     */
     public class AzioneProgrammata extends TimerTask {
 
-        private ArrayList<Attuatore> attuatori;
-        private String azione;
+        /**
+         * Attuatori con cui interagisce l'azione
+         */
+        private final ArrayList<Attuatore> attuatori;
 
+        /**
+         * azione da eseguire specificata dall'utente
+         */
+        private final String azione;
+
+        /**Costruttore di un'istanza Azione Programmata
+         * @param attuatori attuatori su cui agisce l'azione/assegnamentp
+         * @param azione azione da eseguire
+         */
         public AzioneProgrammata(ArrayList<Attuatore> attuatori, String azione) {
-            System.out.println(Thread.currentThread().getName());
             this.attuatori = attuatori;
             this.azione = azione;
-
         }
 
+        /**Permette di ottenere in formato avviamente testuale l'azione da eseguire specificata dall'utente
+         * @return azione da eseguire
+         */
         public String getAzione() {
             return azione;
         }

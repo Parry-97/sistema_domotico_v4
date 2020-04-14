@@ -1827,6 +1827,11 @@ public class Main {
 
     }
 
+    /** Permette di ripristinare attraverso deserializzazione una lista di oggetti da un file con nome/percorso specificato
+     * @param filename percorso del file da cui ripristianre
+     * @param <T> tipo di dato degli oggetti della lista
+     * @return lista di oggetti ripristinata
+     */
     private static <T> ArrayList<T> ripristina(String filename) {
         FileInputStream in;
         ArrayList<T> list = new ArrayList<>();
@@ -1843,6 +1848,11 @@ public class Main {
         return list;
     }
 
+    /** Permette di salvare permanentemente su file attraverso serializzazione una determinata lista di oggetti
+     * @param list lista da salvare
+     * @param filename nome/percorso del file su cui salvare la lista
+     * @param <T> tipo di dato degli oggetti della lista
+     */
     public static <T> void salva(ArrayList<T> list, String filename) {
 
         try {
@@ -1860,7 +1870,9 @@ public class Main {
         }
     }
 
-
+    /**Permette di ottenere l'ora corrente in formato testuale hh.mm
+     * @return l'ora corrente
+     */
     public static String getOraCorrente() {
         return Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "." + Calendar.getInstance().get(Calendar.MINUTE);
     }

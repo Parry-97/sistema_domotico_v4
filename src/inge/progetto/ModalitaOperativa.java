@@ -66,11 +66,6 @@ public class ModalitaOperativa extends Informazione
         System.out.println("*** Il parametro è stato impostato correttamente al nuovo valore ***");
     }
 
-    @Override
-    public String getValore() {
-        return (String) this.valore;
-    }
-
     /**
      * Fornisce una rappresentazione testuale che descrive brevemente l'istanza
      * @return stampa il toString della modalità operativa

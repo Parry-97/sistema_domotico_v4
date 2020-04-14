@@ -94,7 +94,6 @@ public class Attuatore {
     /**Aggiunge l'artefatto alla lista degli artefatti comandati dall'attuatore
      * @param art nuovo artefatto che si desidera comandare attraverso l'attuatore
      */
-
     public void aggiungiArtefatto(Artefatto art) {
         listaComandati.add(art);
         for (ModalitaOperativa m: this.categoria.getModalita()) {
@@ -185,7 +184,6 @@ public class Attuatore {
     /** Modifica la modalit&agrave; operatica/stato degli artefatti comandati dall'attuatore
      * @param mod nuova modalit&agrave; operativa da assegnare agli artefatti comandati dall'attuatore
      */
-
     private void modificaArtefatti(ModalitaOperativa mod) {
 
         for (Artefatto art: listaComandati) {
@@ -207,6 +205,10 @@ public class Attuatore {
         this.statoAttivazione = statoAttivazione;
     }
 
+    /**
+     * Permette di conoscere se l'attuatore ha caratteristica di associazione singola
+     * @return true se puo essere associato aa solo un artefatto, false altrimenti
+     */
     public boolean isSingolo() {
         return singolo;
     }
