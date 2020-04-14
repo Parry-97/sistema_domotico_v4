@@ -235,6 +235,9 @@ public class UnitaImmobiliare {
         return nome;
     }
 
+    /**
+     * Effettua la rilettura delle rilevazioni di ogni sensore
+     */
     public void refreshLetture() {
         if(listaSensori.isEmpty())
             return;

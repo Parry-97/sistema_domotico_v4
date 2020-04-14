@@ -10,7 +10,9 @@ import java.io.Serializable;
  * @author Parampal Singh, Mattia Nodari
  */
 public class Informazione implements Serializable,Cloneable {
-
+    /**
+     * nome dell'informazione acquisita dal sensore.
+     */
 
     private String nome;
 
