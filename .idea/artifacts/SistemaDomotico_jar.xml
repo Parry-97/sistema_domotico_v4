@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="SistemaDomotico:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SistemaDomotico_jar</output-path>
+    <root id="root">
+      <element id="archive" name="SistemaDomotico.jar">
+        <element id="module-output" name="SistemaDomotico" />
+      </element>
+      <element id="library" level="project" name="UniBSFpLib" />
+    </root>
+  </artifact>
+</component>
